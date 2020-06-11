@@ -1,0 +1,8 @@
+.active-state {
+    border: 1px solid #000;
+    border-radius: .25rem;
+    background-color: #fff;
+    padding: .375rem .75rem;
+    text-align: center;
+    height: calc(1.5em + .75rem + 2px)
+  }
