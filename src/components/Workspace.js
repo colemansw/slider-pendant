@@ -86,7 +86,7 @@ function Workspace() {
       <DisconnectButton port={state.port} />
       <Row className="mb-3">
         <Col xs={12}>
-          <Link to="/axes" className="btn btn-outline-dark btn-block">
+          <Link to="/control" className="btn btn-outline-dark btn-block">
             Control
           </Link>
         </Col>
