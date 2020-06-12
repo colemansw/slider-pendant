@@ -104,7 +104,7 @@ Follow the instructions in the ReadMe, especially about enabling the debug tools
             "webRoot": "${workspaceFolder}/src",
             "pathMappings": [
                 {
-                    "url": "http://ip-address-of-rpi/path/to/src",
+                    "url": "http://ip-address-of-rpi:3000/path/to/src",
                     "path": "${workspaceFolder}/src"
                 }
             ]

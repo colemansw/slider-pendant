@@ -33,14 +33,14 @@ import {
   controllerCommand
 } from '../../lib/controller'
 import gcodeGenerator from '../../utils/gcode'
-import './css/axes.css'
+import './css/control.css'
 
-export default function Axes() {
+export default function Control() {
   const { state, dispatch } = useContext(CncContext)
   const { step } = state
   const [motorsEnergized, setMotorsEnergized] = useState(true)
 
-  // Components used by Axes
+  // Components used by Control
 
   const Position = ({ label = null, position }) => {
     const { x, y, z } = position
@@ -71,7 +71,7 @@ export default function Axes() {
   const Status = ({ mpos, wpos, units }) => {
     return (
       <Fragment>
-        <AxesHeading labels={[`(${units})`, 'X', 'Y', 'Z']} />
+        <AxesHeading labels={['Axes', 'Pan(\u00b0)', 'Tilt(\u00b0)', `Track(${units})`]} />
         <Row className="mb-2">
           <Position label={'Machine:'} position={mpos} />
         </Row>
@@ -124,7 +124,7 @@ export default function Axes() {
     )
   }
 
-  // Functions used by Axes
+  // Functions used by Control
 
   const sendMove = (cmd, e) => {
     e.preventDefault()
@@ -234,7 +234,7 @@ export default function Axes() {
 
   return (
     <Fragment>
-      <h1 className="text-center">Axes</h1>
+      <h1 className="text-center">Control</h1>
       <Row noGutters className="text-center">
         <DropdownMenu />
         <Col xs={6}>

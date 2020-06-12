@@ -87,7 +87,7 @@ function Workspace() {
       <Row className="mb-3">
         <Col xs={12}>
           <Link to="/axes" className="btn btn-outline-dark btn-block">
-            Axes
+            Control
           </Link>
         </Col>
       </Row>

@@ -33,7 +33,7 @@ export default function Connect({ state }) {
         console.error(err)
         return
       }
-      history.push({ pathname: '/axes' })
+      history.push({ pathname: '/control' })
     })
   }
 
