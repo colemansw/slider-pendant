@@ -1,4 +1,6 @@
-import {controllerCommand} from '../lib/controller'
+// import {controllerCommand} from '../lib/controller'
+// import { SET_GRBL_OUTPUT } from '../actions/types'
+// import { RX_BUFFER_SIZE } from '../lib/constants'
 
 /**
  * Return the G-Code string
@@ -6,7 +8,7 @@ import {controllerCommand} from '../lib/controller'
  * @param {Number} t The duration of the move (seconds)
  * @param {Boolean} o True for open shutter
  */
-const modalGroup = (p, t, o) => ` G1 X${p.x.toFixed(3)} Y${p.y.toFixed(3)} Z${p.z.toFixed(3)} S${255 * o} F${(60 / t).toFixed(2)}`
+const modalGroup = (p, t, o) => `G1 X${p.x.toFixed(3)} Y${p.y.toFixed(3)} Z${p.z.toFixed(3)} S${255 * o} F${(60 / t).toFixed(2)}\n`
 
 /**
  * Generate lines of G-Code for every frame
@@ -83,20 +85,30 @@ const toNumbers = (obj) => {
 
 /**
  * 
- * @param {Array} positions 
- * @param {Array} transitions 
+ * @param {Array} positions
+ * @param {Array} transitions
  */
-function gcodeGenerator(positions, transitions) {
-  controllerCommand('gcode', 'G93') // G93 - inverse time mode, 
-  controllerCommand('gcode', 'M3 S0') // M3 - activate shutter, S0 - 0v.
+function* gcodeGenerator(positions, transitions) {
+  yield 'G93\n'  // G93 - inverse time mode, 
+  yield 'M3 S0\n' // M3 - activate shutter, S0 - 0v.
   const start = toNumbers(positions[0])
-  controllerCommand('gcode', `G0 X${start.x} Y${start.y} Z${start.z}`)
-  transitions.forEach((t, i) => {
-    for (let g of gCode(toNumbers(positions[i]), toNumbers(positions[i + 1]), i===0, toNumbers(t))) {
-      controllerCommand('gcode', g)
-    }
-  })
-  controllerCommand('gcode', 'M5') // M5 deactivate shutter
+  yield `G0 X${start.x} Y${start.y} Z${start.z}\n`
+  let index = 0
+  for(let t of transitions) {
+    yield* gCode(toNumbers(positions[index]), toNumbers(positions[index + 1]), index===0, toNumbers(t))
+    index++
+  } 
+  yield 'M5' // M5 deactivate shutter
 }
 
-export default gcodeGenerator
+function gcodeBlob(state) {
+  const options = {type: 'text/plain'}
+  var blob = new Blob([], options)
+  for (let line of gcodeGenerator(state.positions, state.transitions)) {
+    console.log(line)
+    blob = new Blob([blob, line], options)
+  }
+  return blob
+} 
+
+export default gcodeBlob

@@ -63,9 +63,9 @@ function ConnectSocket({ token, host, dispatch, children }) {
     },
     'serialport:write': data => {
       const style = 'font-weight: bold; line-height: 20px; padding: 2px 4px; border: 1px solid; color: #00529B; background: #BDE5F8';
-      console.log('%cW%c', style, '', data);
+      console.log('%cW%c', style, '', data)
     },
-    'serialport:open': (options) => {
+    'serialport:open': options => {
       const { port, controllerType } = options;
       dispatch({ type: SET_PORT, payload: port })
       if (controllerType === GRBL) {

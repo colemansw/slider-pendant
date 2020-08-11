@@ -21,12 +21,27 @@ import {
   SET_PORT,
   SET_PORTS,
   SET_CONTROLLER_CONNECTED,
-  SET_HOST
+  SET_HOST,
+  ADD_BLOB,
+  REMOVE_BLOB
 } from '../actions/types'
 
 export const reducer = (state, action) => {
   const { type, payload } = action
   switch (type) {
+    case ADD_BLOB:
+      return {
+        ...state,
+        blobURLs: [...state.blobURLs, payload]
+      }
+      case REMOVE_BLOB:
+        return {
+          ...state,
+          blobURLs: [
+            ...state.blobURLs.slice(0, payload),
+            ...state.blobURLs.slice(payload + 1)
+          ]
+        }
     case SET_HOST:
       return {
         ...state,
