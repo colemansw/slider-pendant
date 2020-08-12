@@ -46,7 +46,7 @@ export const getInitialState = () => {
     currentIndex: null,
     showModal: false,
     units: METRIC_UNITS,
-    blobURLs: []
+    // blobURLs: []
   }
 }
 

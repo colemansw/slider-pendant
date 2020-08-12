@@ -28,8 +28,7 @@ import {
   ADD_POSITION,
   SET_CURRENT_TRANSITION,
   SET_MODAL,
-  REMOVE_TRANSITION,
-  ADD_BLOB
+  REMOVE_TRANSITION
 } from '../../actions/types'
 import {
   controllerCommand
@@ -200,11 +199,28 @@ export default function Control() {
     e.target.blur()
   }
 
+  function downloadBlob(blob) {
+    const url = URL.createObjectURL(blob)
+    const timestamp = new Date()
+    const a = document.createElement('a')
+    a.href = url 
+    a.download = `shot_${timestamp.toISOString()}.gcode`
+    const clickHandler = () => {
+      setTimeout(() => {
+        URL.revokeObjectURL(url)
+        a.removeEventListener('click', clickHandler)
+      }, 150)
+    }
+    a.addEventListener('click', clickHandler, false)
+    a.click()
+    return a
+  }
+
   const handleMake = e => {
     e.preventDefault()
     const { target } = e
-    const blob = gcodeBlob(state)
-    dispatch({type: ADD_BLOB, payload:URL.createObjectURL(blob)})
+    downloadBlob(gcodeBlob(state))
+    // dispatch({type: ADD_BLOB, payload:URL.createObjectURL(blob)})
     target.blur()
   }
 
@@ -334,7 +350,7 @@ export default function Control() {
         </Row> :
         null
       }
-      {state.blobURLs.length > 0 ?
+      {/* {state.blobURLs.length > 0 ?
       <Row>
         <Col xs={12}>
           <h2>Download G-Code</h2>
@@ -350,7 +366,7 @@ export default function Control() {
           </ListGroup.Item>
         ))}
       </ListGroup>:
-      null}
+      null} */}
       {state.showModal ?
         <TransitionModal
           state={state}
