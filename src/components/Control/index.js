@@ -33,6 +33,7 @@ import {
 import {
   controllerCommand
 } from '../../lib/controller'
+import Joysticks from '../VirtualJoysticks'
 import gcodeBlob from '../../utils/gcode'
 import './css/control.css'
 
@@ -324,6 +325,7 @@ export default function Control() {
           </div>
         </Col>
       </Row>
+      <Joysticks />
       <Row className="mt-2 text-center">
         <Col xs={12}>
           <h3>Recorded positions</h3>
@@ -350,23 +352,6 @@ export default function Control() {
         </Row> :
         null
       }
-      {/* {state.blobURLs.length > 0 ?
-      <Row>
-        <Col xs={12}>
-          <h2>Download G-Code</h2>
-        </Col>
-      </Row> :
-      null
-      }
-      {state.blobURLs.length > 0 ?
-      <ListGroup>
-        {state.blobURLs.map((u, i) => (
-          <ListGroup.Item key={`url_${i}`}>
-            <a href={u} download={`shot_${i + 1}.gcode`}>Shot {i + 1}</a>
-          </ListGroup.Item>
-        ))}
-      </ListGroup>:
-      null} */}
       {state.showModal ?
         <TransitionModal
           state={state}
