@@ -47,13 +47,13 @@ export default function Joysticks() {
     controllerCommand('gcode', 'G91')
     controllerCommand(
       'gcode',
-      `G0 ${incrementAxis('X', x)}${incrementAxis('Y', y)}${incrementAxis('Z', z)}`
+      `G0 ${moveAxis('X', x, 0)}${moveAxis('Y', y, 0)}${moveAxis('Z', z, 0)}`
     )
     controllerCommand('gcode', 'G90')
   }
 
-  const incrementAxis = (axis, inc) => {
-    return inc !== 0 ? ` ${axis}${inc.toFixed(2)}` : ''
+  const moveAxis = (axis, value, ignored) => {
+    return value === ignored ? '' : ` ${axis}${value.toFixed(2)}`
   }
 
   const handleStart = () => {
@@ -89,10 +89,12 @@ export default function Joysticks() {
     while (target.type !== 'button') {
       target = target.parentElement
     }
-    const format = (a, v) => v === undefined ? '' : ` ${a}${v}`
     const { x, y, z } = positions
     controllerCommand('gcode', 'G90')
-    controllerCommand('gcode', `G0${format('X', x)}${format('Y', y)}${format('Z', z)}`)
+    controllerCommand(
+      'gcode',
+      `G0${moveAxis('X', x)}${moveAxis('Y', y)}${moveAxis('Z', z)}`
+    )
     target.blur()
   }
 
