@@ -1,32 +1,12 @@
-import React, { Fragment } from 'react'
-import Button from 'react-bootstrap/Button'
-import ButtonGroup from 'react-bootstrap/ButtonGroup'
+import React from 'react'
 import ReactNipple from 'react-nipple'
-
-const ActionButtons = props => {
-  const { buttons, title } = props
-  return (
-    <ButtonGroup aria-label="Button actions">
-      {buttons.map((b, i) => (
-        <Button
-          key={`b_${title.replace(' ', '_')}_${i}`}
-          variant="secondary"
-          title={b.title}
-          onClick={b.onClick}
-        >
-          {b.label}
-        </Button>
-      ))}
-    </ButtonGroup>
-  )
-}
 
 export default function Joystick(props) {
 
-  const { title = '', color, onStart, onMove, onEnd, buttons, lock = false } = props
+  const { color, onStart, onMove, onEnd, lock = false } = props
 
   return (
-    <Fragment>
+    <div className="mx-auto">
       <ReactNipple
         options={{
           mode: 'static',
@@ -35,7 +15,7 @@ export default function Joystick(props) {
           lockX: lock
         }}
         style={{
-          width: 'auto',
+          width: 150,
           height: 150,
           position: 'relative'
         }}
@@ -43,9 +23,6 @@ export default function Joystick(props) {
         onMove={onMove}
         onEnd={onEnd}
       />
-      <div className="text-center">
-        <ActionButtons buttons={buttons} title={title} />
-      </div>
-    </Fragment>
+    </div>
   )
 }

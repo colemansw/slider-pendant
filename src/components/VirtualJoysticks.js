@@ -1,18 +1,14 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
-import Button from 'react-bootstrap/Button'
-import ButtonGroup from 'react-bootstrap/ButtonGroup'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faArrowDown,
   faArrowLeft,
   faArrowRight,
-  faArrowUp,
-  faLock,
-  faUnlock
+  faArrowUp
 } from '@fortawesome/free-solid-svg-icons'
 import Joystick from './Joystick'
+import { ActionButtons, LockButtons } from './JoystickButtons'
 import { controllerCommand } from '../lib/controller'
 
 const UPDATE_INTERVAL = 200 // ms
@@ -26,7 +22,9 @@ const MAXSPEED = {
   z: MAXIMUM_SPEED / 50 * UPDATE_INTERVAL / 1000
 } //mm per second
 
-export default function Joysticks() {
+export default function Joysticks(props) {
+
+  const { isDisabled } = props
 
   const [xRate, setXRate] = useState(0)
   const [yRate, setYRate] = useState(0)
@@ -57,13 +55,15 @@ export default function Joysticks() {
   }
 
   const handleStart = () => {
-    setIsMoving(true)
+    if (!isDisabled) setIsMoving(true)
   }
 
   const handleXYMove = (evt, data) => {
-    const { distance, angle } = data
-    setXRate(distance * Math.cos(angle.radian))
-    setYRate(distance * Math.sin(angle.radian))
+    if (isMoving) {
+      const { distance, angle } = data
+      setXRate(distance * Math.cos(angle.radian))
+      setYRate(distance * Math.sin(angle.radian))
+    }
   }
 
   const handleXYEnd = () => {
@@ -73,9 +73,11 @@ export default function Joysticks() {
   }
 
   const handleZMove = (evt, data) => {
-    const { distance, direction } = data
-    const dx = direction ? direction.x === 'right' ? 1 : -1 : 0
-    setZRate(distance * dx)
+    if (isMoving) {
+      const { distance, direction } = data
+      const dx = direction ? direction.x === 'right' ? 1 : -1 : 0
+      setZRate(distance * dx)
+    }
   }
 
   const handleZEnd = () => {
@@ -83,29 +85,30 @@ export default function Joysticks() {
     setIsMoving(false)
   }
 
+  const blurButton = t => {
+    while (t.type !== 'button') {
+      t = t.parentElement
+    }
+    t.blur()
+  }
+
   const setAxes = (positions, e) => {
     e.preventDefault()
-    let { target } = e
-    while (target.type !== 'button') {
-      target = target.parentElement
-    }
+    const { target } = e
     const { x, y, z } = positions
     controllerCommand('gcode', 'G90')
     controllerCommand(
       'gcode',
       `G0${moveAxis('X', x)}${moveAxis('Y', y)}${moveAxis('Z', z)}`
     )
-    target.blur()
+    blurButton(target)
   }
 
   const setLock = (lockFunc, newValue, e) => {
-    let { target } = e
-    while (target.type !== 'button') {
-      target = target.parentElement
-    }
     e.preventDefault()
+    const { target } = e
     lockFunc(newValue)
-    target.blur()
+    blurButton(target)
   }
 
   useEffect(() => {
@@ -121,9 +124,13 @@ export default function Joysticks() {
         jogCmd(cmds)
       }, UPDATE_INTERVAL)
     } else {
-      if (timerId) clearInterval(timerId)
+      if (timerId) {
+        clearInterval(timerId)
+      }
     }
-    return () => { if (timerId) clearInterval(timerId) }
+    return () => { if (timerId) {
+      clearInterval(timerId)
+    } }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMoving, xRate, yRate, zRate, xySens, zSens, xLock, yLock])
 
@@ -173,69 +180,74 @@ export default function Joysticks() {
     }
   ]
 
-  const LockButtons = props => {
-    const { arrow1, arrow2, title, onClick, lockValue, vertical = false } = props
-    return (
-      <ButtonGroup vertical={vertical} className={vertical ? 'float-right' : ''}>
-        <Button variant="secondary" title={title} onClick={onClick}>
-          <FontAwesomeIcon icon={arrow1} />
-        </Button>
-        <Button variant="secondary" title={title} onClick={onClick}>
-          <FontAwesomeIcon icon={lockValue ? faLock : faUnlock} />
-        </Button>
-        <Button variant="secondary" title={title} onClick={onClick}>
-          <FontAwesomeIcon icon={arrow2} />
-        </Button>
-      </ButtonGroup>
-    )
-  }
-
   return (
-    <Fragment>
-      <Row className="mt-2">
-        <Col xs={{ span: 4, offset: 1 }} className="text-center">
-          <LockButtons
-            arrow1={faArrowLeft}
-            arrow2={faArrowRight}
-            title={'Lock X axis'}
-            onClick={e => setLock(setXLock, !xLock, e)}
-            lockValue={xLock}
-          />
-        </Col>
-      </Row>
-      <Row className="align-items-center">
-        <Col xs={1}>
-          <LockButtons
-            arrow1={faArrowUp}
-            arrow2={faArrowDown}
-            title={"Lock Y axis"}
-            onClick={e => setLock(setYLock, !yLock, e)}
-            lockValue={yLock}
-            vertical={true}
-          />
-        </Col>
-        <Col xs={4}>
-          <Joystick
-            color={'red'}
-            onStart={handleStart}
-            onMove={handleXYMove}
-            onEnd={handleXYEnd}
-            buttons={xyBtns}
-            title={'XY axis'}
-          />
-        </Col>
-        <Col xs={4}>
-          <Joystick
-            color={'blue'}
-            lock={true}
-            onStart={handleStart}
-            onMove={handleZMove}
-            onEnd={handleZEnd}
-            buttons={zBtns}
-            title={'Z axis'}
-          />
-        </Col>
-      </Row>
-    </Fragment>
+    <Row className="mt-2 align-items-end">
+      <Col sm={6}>
+        <Row>
+          <Col sm={{ span: 4, offset: 2 }}>
+            <LockButtons
+              arrow1={faArrowLeft}
+              arrow2={faArrowRight}
+              title={'Lock X axis'}
+              onClick={e => setLock(setXLock, !xLock, e)}
+              lockValue={xLock}
+              isDisabled={isDisabled}
+            />
+          </Col>
+        </Row>
+        <Row>
+          <Col sm={2}>
+            <LockButtons
+              arrow1={faArrowUp}
+              arrow2={faArrowDown}
+              title={"Lock Y axis"}
+              onClick={e => setLock(setYLock, !yLock, e)}
+              lockValue={yLock}
+              vertical={true}
+              isDisabled={isDisabled}
+            />
+          </Col>
+          <Col sm={4}>
+            <Joystick
+              color={'red'}
+              onStart={handleStart}
+              onMove={handleXYMove}
+              onEnd={handleXYEnd}
+            />
+          </Col>
+        </Row>
+        <Row>
+          <Col sm={{ span: 4, offset: 2 }}>
+            <ActionButtons
+              buttons={xyBtns}
+              title={'XY axes'}
+              isDisabled={isDisabled}
+            />
+          </Col>
+        </Row>
+      </Col>
+      <Col sm={4}>
+        <Row>
+          <Col sm={4}>
+            <Joystick
+              color={'blue'}
+              lock={true}
+              onStart={handleStart}
+              onMove={handleZMove}
+              onEnd={handleZEnd}
+            />
+          </Col>
+        </Row>
+        <Row>
+          <Col sm={4}>
+            <ActionButtons
+              buttons={zBtns}
+              title={'Z axis'}
+              isDisabled={isDisabled}
+            />
+          </Col>
+        </Row>
+      </Col>
+    </Row>
   )
 }

@@ -325,7 +325,7 @@ export default function Control() {
           </div>
         </Col>
       </Row>
-      <Joysticks />
+      <Joysticks isDisabled={state.activeState !== 'Idle'}/>
       <Row className="mt-2 text-center">
         <Col xs={12}>
           <h3>Recorded positions</h3>
