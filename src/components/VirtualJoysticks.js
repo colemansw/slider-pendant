@@ -12,15 +12,15 @@ import { ActionButtons, LockButtons } from './JoystickButtons'
 import { controllerCommand } from '../lib/controller'
 
 const UPDATE_INTERVAL = 200 // ms
-const MAXIMUM_SPEED = 25 // mm/s
+const MAXIMUM_SPEED = 10 // mm/s
 
 // The joystick maximum is 50, so if we set the maximum speed
-// to be 25mm/s that gives MAXIMUM_SPEED/max_range = 25/50
+// to be 25mm/s that gives MAXIMUM_SPEED/max_range = 25/50 mm/s
 const MAXSPEED = {
   x: MAXIMUM_SPEED / 50 * UPDATE_INTERVAL / 1000,
   y: MAXIMUM_SPEED / 50 * UPDATE_INTERVAL / 1000,
   z: MAXIMUM_SPEED / 50 * UPDATE_INTERVAL / 1000
-} //mm per second
+} // mm per second
 
 export default function Joysticks(props) {
 

@@ -8,7 +8,7 @@ export const getInitialState = () => {
     ports: [],
     controllerType: '', // Form default - from cookie
     controller: {
-      type: controller.type,
+      controllerType: controller.controllerType,
       state: controller.state,
       connected: controller.connected,
       command: controller.command

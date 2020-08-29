@@ -236,7 +236,7 @@ export default function Control() {
   }, [])
 
   useEffect(() => {
-    switch (state.controller.type) {
+    switch (state.controller.controllerType) {
       case 'Grbl':
         if (!motorsEnergized) {
           controllerCommand('gcode', '$SLP')
