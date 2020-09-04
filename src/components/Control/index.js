@@ -6,14 +6,14 @@ import Button from 'react-bootstrap/Button'
 import ButtonGroup from 'react-bootstrap/ButtonGroup'
 import ListGroup from 'react-bootstrap/ListGroup'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-// import { Link } from 'react-router-dom'
 import {
+  faAngleDoubleDown,
+  // faCrosshairs,
   faPause,
   faPlay,
   faSync,
-  faUnlock,
   faTrash,
-  faAngleDoubleDown
+  faUnlock
 } from '@fortawesome/free-solid-svg-icons'
 import { CncContext } from '../../App'
 import ControlPad from './ControlPad'
@@ -110,10 +110,19 @@ export default function Control() {
         dispatch({ type: SET_CURRENT_TRANSITION, payload: state.transitions[index] })
       }
     })
+
+    const moveToButton = (getTitle, index) => ({
+      icon: faAngleDoubleDown,
+      // icon: faCrosshairs,
+      title: `Move to: ${getTitle(index)}`,
+      handleClick: () => {
+        console.log('Move clicked!')
+      }
+    })
   
     const buttons = isLast ?
-      [resetButton(index, dispatch), removeButton(isLast, index, dispatch)] :
-      [resetButton(index, dispatch), transitionButton(getTitle, index, dispatch), removeButton(isLast, index, dispatch)]
+      [ moveToButton(getTitle, index), resetButton(index, dispatch), removeButton(isLast, index, dispatch)] :
+      [ moveToButton(getTitle, index), resetButton(index, dispatch), transitionButton(getTitle, index, dispatch), removeButton(isLast, index, dispatch)]
   
     return (
       <Col xs>
