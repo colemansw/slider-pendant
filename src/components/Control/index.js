@@ -8,7 +8,7 @@ import ListGroup from 'react-bootstrap/ListGroup'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faAngleDoubleDown,
-  // faCrosshairs,
+  faCrosshairs,
   faPause,
   faPlay,
   faSync,
@@ -61,7 +61,7 @@ export default function Control() {
       <FontAwesomeIcon icon={icon} />
     </Button>
   )
-  
+
   const AxesHeading = ({ labels }) => (
     <Row className="my-2 text-center">
       {labels.map((p, i) => (
@@ -69,7 +69,7 @@ export default function Control() {
       ))}
     </Row>
   )
-  
+
   const Status = ({ mpos, wpos, units }) => {
     return (
       <Fragment>
@@ -84,11 +84,11 @@ export default function Control() {
     )
   }
 
-  const Actions = ({ getTitle, isLast, index, dispatch }) => {
-    
+  const Actions = ({ position, isLast, index, dispatch }) => {
+
     const removeButton = (isLast, index, dispatch) => ({
       icon: faTrash,
-      title: 'Remove position',
+      title: 'Remove this position',
       handleClick: () => {
         dispatch({ type: REMOVE_POSITION, payload: index })
         dispatch({ type: REMOVE_TRANSITION, payload: isLast ? index - 1 : index })
@@ -101,29 +101,33 @@ export default function Control() {
       handleClick: () => dispatch({ type: RESET_POSITION, payload: index })
     })
 
-    const transitionButton = (getTitle, index, dispatch) => ({
-      icon: faAngleDoubleDown,
-      title: `Edit: ${getTitle(index)}`,
-      handleClick: () => {
-        dispatch({ type: SET_MODAL, payload: true })
-        dispatch({ type: SET_CURRENT_INDEX, payload: index })
-        dispatch({ type: SET_CURRENT_TRANSITION, payload: state.transitions[index] })
+    const transitionButton = (index, transition = {}, dispatch) => {
+      const { frames = 0, shutter = 0, interval = 0 } = transition
+      return {
+        icon: faAngleDoubleDown,
+        title: `Edit: Fr: ${frames}, In: ${interval}, Sh: ${shutter}`,
+        handleClick: () => {
+          dispatch({ type: SET_MODAL, payload: true })
+          dispatch({ type: SET_CURRENT_INDEX, payload: index })
+          dispatch({ type: SET_CURRENT_TRANSITION, payload: transition })
+        }
       }
-    })
+    }
 
-    const moveToButton = (getTitle, index) => ({
-      icon: faAngleDoubleDown,
-      // icon: faCrosshairs,
-      title: `Move to: ${getTitle(index)}`,
-      handleClick: () => {
-        console.log('Move clicked!')
+    const moveToButton = ({ x, y, z }) => {
+      return {
+        icon: faCrosshairs,
+        title: 'Move to this position',
+        handleClick: () => {
+          controllerCommand('gcode', `G0 X${x} Y${y} Z${z}`)
+        }
       }
-    })
-  
+    }
+
     const buttons = isLast ?
-      [ moveToButton(getTitle, index), resetButton(index, dispatch), removeButton(isLast, index, dispatch)] :
-      [ moveToButton(getTitle, index), resetButton(index, dispatch), transitionButton(getTitle, index, dispatch), removeButton(isLast, index, dispatch)]
-  
+      [moveToButton(position), resetButton(index, dispatch), removeButton(isLast, index, dispatch)] :
+      [moveToButton(position), resetButton(index, dispatch), transitionButton(index, dispatch), removeButton(isLast, index, dispatch)]
+
     return (
       <Col xs>
         <ButtonGroup aria-label={`Actions for item ${index + 1}`}>
@@ -213,7 +217,7 @@ export default function Control() {
     const url = URL.createObjectURL(blob)
     const timestamp = new Date()
     const a = document.createElement('a')
-    a.href = url 
+    a.href = url
     a.download = `shot_${timestamp.toISOString()}.gcode`
     const clickHandler = () => {
       setTimeout(() => {
@@ -232,11 +236,6 @@ export default function Control() {
     downloadBlob(gcodeBlob(state))
     // dispatch({type: ADD_BLOB, payload:URL.createObjectURL(blob)})
     target.blur()
-  }
-
-  const showTransition = index => {
-    const { frames, interval, shutter } = state.transitions[index]
-    return `Fr: ${frames}, In: ${interval}, Sh: ${shutter}`
   }
 
   useEffect(() => {
@@ -334,7 +333,7 @@ export default function Control() {
           </div>
         </Col>
       </Row>
-      <Joysticks isDisabled={state.activeState !== 'Idle'}/>
+      <Joysticks isDisabled={state.activeState !== 'Idle'} />
       <Row className="mt-2 text-center">
         <Col xs={12}>
           <h3>Recorded positions</h3>
@@ -346,7 +345,7 @@ export default function Control() {
           <ListGroup.Item key={`pk_${i}`}>
             <Row>
               <Position position={p} index={i} />
-              <Actions getTitle={showTransition} isLast={i === (a.length-1)} index={i} dispatch={dispatch} />
+              <Actions position={p} isLast={i === (a.length - 1)} index={i} transition={state.transitions[i]} dispatch={dispatch} />
             </Row>
           </ListGroup.Item>
         ))}
@@ -366,9 +365,7 @@ export default function Control() {
           state={state}
           dispatch={dispatch}
         /> :
-      null}
+        null}
     </Fragment >
   )
 }
-
-// export { Position }
