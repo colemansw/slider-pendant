@@ -56,8 +56,8 @@ export default function Control() {
     )
   }
 
-  const ActionButton = ({ title, icon, handleClick }) => (
-    <Button variant="outline-dark" size="sm" title={title} onClick={handleClick}>
+  const ActionButton = ({ title, icon, onClick }) => (
+    <Button variant="outline-dark" size="sm" title={title} onClick={onClick}>
       <FontAwesomeIcon icon={icon} />
     </Button>
   )
@@ -81,61 +81,6 @@ export default function Control() {
           <Position label={'Working:'} position={wpos} />
         </Row>
       </Fragment>
-    )
-  }
-
-  const Actions = ({ position, isLast, index, dispatch }) => {
-
-    const removeButton = (isLast, index, dispatch) => ({
-      icon: faTrash,
-      title: 'Remove this position',
-      handleClick: () => {
-        dispatch({ type: REMOVE_POSITION, payload: index })
-        dispatch({ type: REMOVE_TRANSITION, payload: isLast ? index - 1 : index })
-      }
-    })
-
-    const resetButton = (index, dispatch) => ({
-      icon: faSync,
-      title: 'Set to current position',
-      handleClick: () => dispatch({ type: RESET_POSITION, payload: index })
-    })
-
-    const transitionButton = (index, transition = {}, dispatch) => {
-      const { frames = 0, shutter = 0, interval = 0 } = transition
-      return {
-        icon: faAngleDoubleDown,
-        title: `Edit: Fr: ${frames}, In: ${interval}, Sh: ${shutter}`,
-        handleClick: () => {
-          dispatch({ type: SET_MODAL, payload: true })
-          dispatch({ type: SET_CURRENT_INDEX, payload: index })
-          dispatch({ type: SET_CURRENT_TRANSITION, payload: transition })
-        }
-      }
-    }
-
-    const moveToButton = ({ x, y, z }) => {
-      return {
-        icon: faCrosshairs,
-        title: 'Move to this position',
-        handleClick: () => {
-          controllerCommand('gcode', `G0 X${x} Y${y} Z${z}`)
-        }
-      }
-    }
-
-    const buttons = isLast ?
-      [moveToButton(position), resetButton(index, dispatch), removeButton(isLast, index, dispatch)] :
-      [moveToButton(position), resetButton(index, dispatch), transitionButton(index, dispatch), removeButton(isLast, index, dispatch)]
-
-    return (
-      <Col xs>
-        <ButtonGroup aria-label={`Actions for item ${index + 1}`}>
-          {buttons.map((a, i) => (
-            <ActionButton key={`bk_${i}`} variant="outline_dark" title={a.title} handleClick={a.handleClick} icon={a.icon} />
-          ))}
-        </ButtonGroup>
-      </Col>
     )
   }
 
@@ -234,7 +179,6 @@ export default function Control() {
     e.preventDefault()
     const { target } = e
     downloadBlob(gcodeBlob(state))
-    // dispatch({type: ADD_BLOB, payload:URL.createObjectURL(blob)})
     target.blur()
   }
 
@@ -345,7 +289,32 @@ export default function Control() {
           <ListGroup.Item key={`pk_${i}`}>
             <Row>
               <Position position={p} index={i} />
-              <Actions position={p} isLast={i === (a.length - 1)} index={i} transition={state.transitions[i]} dispatch={dispatch} />
+              <ButtonGroup>
+                <ActionButton title={'Move to this position'} icon={faCrosshairs} onClick={() => {
+                  controllerCommand('gcode', `G0 X${p.x} Y${p.y} Z${p.z}`)
+                }} />
+                <ActionButton title={'Set to current position'} icon={faSync} onClick={() => {
+                  dispatch({ type: RESET_POSITION, payload: i })
+                }} />
+                {i !== a.length - 1 ?
+                  <ActionButton
+                    title={`Edit - Fr: ${state.transitions[i].frames}, In: ${state.transitions[i].interval}, Sh: ${state.transitions[i].shutter}`}
+                    icon={faAngleDoubleDown}
+                    onClick={() => {
+                      dispatch({ type: SET_MODAL, payload: true })
+                      dispatch({ type: SET_CURRENT_INDEX, payload: i })
+                      dispatch({ type: SET_CURRENT_TRANSITION, payload: state.transitions[i] })
+                    }} /> :
+                  null}
+                <ActionButton
+                  title={'Remove this position'}
+                  icon={faTrash}
+                  onClick={() => {
+                    dispatch({ type: REMOVE_POSITION, payload: i})
+                    dispatch({ type: REMOVE_TRANSITION, payload: i === a.length - 1 ? i - 1 : i })                  }}
+                />
+              </ButtonGroup>
+              {/* <Actions position={p} isLast={i === (a.length - 1)} index={i} transition={state.transitions[i]} dispatch={dispatch} /> */}
             </Row>
           </ListGroup.Item>
         ))}

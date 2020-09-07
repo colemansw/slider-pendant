@@ -98,14 +98,14 @@ function* gcodeGenerator(positions, transitions) {
     yield* gCode(toNumbers(positions[index]), toNumbers(positions[index + 1]), index===0, toNumbers(t))
     index++
   } 
-  yield 'M5' // M5 deactivate shutter
+  yield 'M5\n' // M5 deactivate shutter
 }
 
 function gcodeBlob(state) {
-  const options = {type: 'text/plain'}
+  const options = {type: 'text/x.gcode'}
   var blob = new Blob([], options)
   for (let line of gcodeGenerator(state.positions, state.transitions)) {
-    console.log(line)
+    // console.log(line)
     blob = new Blob([blob, line], options)
   }
   return blob
